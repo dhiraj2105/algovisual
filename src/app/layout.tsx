@@ -27,6 +27,16 @@ export default function RootLayout({
     <html lang="en">
       <Head>
         <link rel="icon" href="/favicon.ico" />
+        <meta
+          name="description"
+          content="Visualize Data structures and algorithms"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="keywords"
+          content="DSA, Dhiraj kumar, Data Structures and Algorithms"
+        />
+        <meta name="author" content="Dhiraj Kumar" />
       </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
