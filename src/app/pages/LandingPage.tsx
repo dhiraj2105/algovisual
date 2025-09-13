@@ -384,12 +384,15 @@ export default function LandingPage() {
               solid foundation in computer science today.
             </p>
             <motion.button
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg shadow-xl"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg shadow-xl cursor-pointer"
               whileHover={{
                 scale: 1.05,
                 boxShadow: "0px 8px 25px rgba(59, 130, 246, 0.4)",
               }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                window.location.href = "/visualize";
+              }}
             >
               Explore Now
             </motion.button>
