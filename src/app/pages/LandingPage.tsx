@@ -4,29 +4,60 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-// --- Helper Components (SVG Icons) ---
+// --- HELPER COMPONENTS & ICONS ---
 
-const CodeIcon = ({ className }: { className?: string }) => (
+const IconWrapper = ({ children }: { children: React.ReactNode }) => (
+  <div className="bg-slate-200/70 dark:bg-white/10 p-3 rounded-xl ring-1 ring-slate-900/5 dark:ring-white/20 mb-6 w-max">
+    {children}
+  </div>
+);
+
+const CodeIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className={className}
   >
     <polyline points="16 18 22 12 16 6"></polyline>
     <polyline points="8 6 2 12 8 18"></polyline>
   </svg>
 );
-
-const EyeIcon = ({ className }: { className?: string }) => (
+const EyeIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
+    width="28"
+    height="28"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+    <circle cx="12" cy="12" r="3"></circle>
+  </svg>
+);
+const ZapIcon = () => (
+  <svg
+    width="28"
+    height="28"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+  </svg>
+);
+const SunIcon = () => (
+  <svg
     width="24"
     height="24"
     viewBox="0 0 24 24"
@@ -35,383 +66,350 @@ const EyeIcon = ({ className }: { className?: string }) => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className={className}
   >
-    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-    <circle cx="12" cy="12" r="3"></circle>
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2"></path>
+    <path d="M12 20v2"></path>
+    <path d="m4.93 4.93 1.41 1.41"></path>
+    <path d="m17.66 17.66 1.41 1.41"></path>
+    <path d="M2 12h2"></path>
+    <path d="M20 12h2"></path>
+    <path d="m6.34 17.66-1.41 1.41"></path>
+    <path d="m19.07 4.93-1.41 1.41"></path>
   </svg>
 );
-
-const ZapIcon = ({ className }: { className?: string }) => (
+const MoonIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     width="24"
     height="24"
-    viewBox="0 0 24"
+    viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className={className}
   >
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
   </svg>
 );
 
-// --- Main Page Component ---
+// --- ANIMATED BACKGROUND ---
+const Background = () => {
+  return (
+    <div className="absolute inset-0 -z-50 h-full w-full bg-white dark:bg-slate-950 bg-[radial-gradient(circle_500px_at_50%_200px,#e2e8f0,transparent)] dark:bg-[radial-gradient(circle_500px_at_50%_200px,#3e3e70,transparent)]" />
+  );
+};
 
-export default function LandingPage() {
+// --- PAGE SECTIONS AS COMPONENTS ---
+
+const Header = ({
+  theme,
+  setTheme,
+}: {
+  theme: string;
+  setTheme: (theme: string) => void;
+}) => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Data for sections
-  const dataStructures = [
+  return (
+    <motion.header
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className={`z-50 transition-all duration-300 w-full fixed top-0 ${isScrolled ? "bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-lg" : "bg-transparent"}`}
+    >
+      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+        <Link
+          href="/"
+          className="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-500 to-teal-400 text-transparent bg-clip-text"
+        >
+          AlgoVisual
+        </Link>
+        <div className="flex items-center gap-4">
+          <motion.button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+          >
+            {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+          </motion.button>
+          <motion.button
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-lg text-sm"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Login
+          </motion.button>
+        </div>
+      </div>
+    </motion.header>
+  );
+};
+
+const Hero = () => (
+  <section className="relative container mx-auto px-6 py-32 text-center z-10">
+    <motion.h1
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="text-4xl sm:text-6xl md:text-7xl font-extrabold mb-4 tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400"
+    >
+      Visualize Algorithms. <br /> Master Data Structures.
+    </motion.h1>
+    <motion.p
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+      className="max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-400 mb-10"
+    >
+      An interactive, modern, and blazing-fast platform to see algorithms in
+      action. Understand complex concepts with intuitive visualizations.
+    </motion.p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+    >
+      <Link href="/visualize" passHref>
+        <motion.button
+          className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full text-lg shadow-xl cursor-pointer relative overflow-hidden"
+          whileHover={{
+            scale: 1.05,
+            boxShadow: "0px 10px 30px rgba(59, 130, 246, 0.4)",
+          }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <span className="relative z-10">Get Started</span>
+          <motion.div
+            className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.2),transparent_80%)]"
+            animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+        </motion.button>
+      </Link>
+    </motion.div>
+  </section>
+);
+
+const Features = () => {
+  const features = [
+    {
+      icon: <EyeIcon />,
+      title: "Interactive Visualization",
+      description:
+        "Don't just read about algorithms. See them move, step-by-step. Control the speed and watch the magic unfold.",
+    },
+    {
+      icon: <CodeIcon />,
+      title: "Side-by-Side Code",
+      description:
+        "Understand the implementation behind the visualization. See the exact lines of code being executed in real-time.",
+    },
+    {
+      icon: <ZapIcon />,
+      title: "Blazing Fast",
+      description:
+        "Built with Next.js and TypeScript for a seamless, performant, and modern user experience. No lag, just learning.",
+    },
+  ];
+
+  return (
+    <section id="features" className="py-20 sm:py-28">
+      <div className="container mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white">
+            Why AlgoVisual?
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 mt-3 text-lg">
+            Everything you need to conquer DSA.
+          </p>
+        </div>
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={{ visible: { transition: { staggerChildren: 0.2 } } }}
+        >
+          {features.map((feature, i) => (
+            <motion.div
+              key={i}
+              className="bg-white dark:bg-slate-900/70 p-8 rounded-2xl ring-1 ring-slate-900/5 dark:ring-white/10 backdrop-blur-md"
+              variants={{
+                hidden: { opacity: 0, y: 40 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+              }}
+              whileHover={{
+                y: -8,
+                transition: { type: "spring", stiffness: 300 },
+              }}
+            >
+              <IconWrapper>{feature.icon}</IconWrapper>
+              <h3 className="text-2xl font-bold mb-3 text-slate-900 dark:text-white">
+                {feature.title}
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400">
+                {feature.description}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+const Showcase = () => {
+  const ds = [
     "Array",
     "Stack",
     "Queue",
     "Linked List",
     "Tree",
     "Graph",
+    "Heap",
   ];
-  const algorithms = [
+  const algos = [
     "Bubble Sort",
     "Quick Sort",
     "Merge Sort",
     "Binary Search",
     "Dijkstra's",
-    "A* Search",
+    "BFS",
+    "DFS",
   ];
-
-  // Animated text for hero
-  const animatedText = "Visualize".split("");
-  const textVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.05,
-      },
-    }),
-  };
+  const Ticker = ({
+    items,
+    direction = "left",
+  }: {
+    items: string[];
+    direction?: "left" | "right";
+  }) => (
+    <div className="w-full overflow-hidden">
+      <motion.div
+        className="flex gap-4"
+        animate={{
+          x: direction === "left" ? ["0%", "-100%"] : ["-100%", "0%"],
+        }}
+        transition={{ ease: "linear", duration: 20, repeat: Infinity }}
+      >
+        {[...items, ...items].map((item, i) => (
+          <span
+            key={i}
+            className="py-2 px-6 bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded-full font-medium whitespace-nowrap ring-1 ring-slate-900/5 dark:ring-white/10"
+          >
+            {item}
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  );
 
   return (
-    <div className="bg-white text-gray-800 min-h-screen font-sans transition-colors duration-300 overflow-x-hidden">
-      {/* Header */}
-      <motion.header
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className={`z-50 transition-all duration-300 w-full md:w-4/5 md:mx-auto left-0 right-0 ${
-          isScrolled
-            ? "fixed top-0 md:top-4 md:rounded-xl bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200/80"
-            : "absolute top-0"
-        }`}
-      >
-        <div className="container mx-auto px-6 py-3 flex justify-between items-center">
-          <Link
-            href="/"
-            className="text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-500 to-teal-400 text-transparent bg-clip-text"
-          >
-            AlgoVisual
-          </Link>
-
-          <div className="flex items-center">
-            <motion.button
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 sm:px-4 rounded-lg shadow-lg text-sm sm:text-base"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Login
-            </motion.button>
-          </div>
+    <section
+      id="showcase"
+      className="py-20 sm:py-28 bg-slate-100/50 dark:bg-slate-900/70 ring-1 ring-slate-900/5 dark:ring-white/10"
+    >
+      <div className="container mx-auto px-6">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white">
+            What You Can Visualize
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 mt-3 text-lg">
+            A growing library of essential data structures and algorithms.
+          </p>
         </div>
-      </motion.header>
+        <div className="space-y-6">
+          <Ticker items={ds} />
+          <Ticker items={algos} direction="right" />
+        </div>
+      </div>
+    </section>
+  );
+};
 
-      <main className="pt-24">
-        {/* Hero Section */}
-        <motion.section
-          className="container mx-auto px-6 py-16 sm:py-20 text-center"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: { staggerChildren: 0.2 },
-            },
+const About = () => (
+  <section id="about" className="py-20 sm:py-28">
+    <div className="container mx-auto px-6 text-center">
+      <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-slate-900 dark:text-white">
+        Ready to Start Learning?
+      </h2>
+      <p className="max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-400 mb-10">
+        Stop struggling with complex topics. Start visualizing and build a solid
+        foundation in computer science today.
+      </p>
+      <Link href="/visualize" passHref>
+        <motion.button
+          className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full text-lg shadow-xl cursor-pointer"
+          whileHover={{
+            scale: 1.05,
+            boxShadow: "0px 10px 30px rgba(59, 130, 246, 0.4)",
           }}
+          whileTap={{ scale: 0.95 }}
         >
-          <div className="absolute inset-0 -z-1 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_3rem] sm:bg-[size:6rem_4rem]">
-            <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_50%_200px,#3b82f633,transparent)]"></div>
-          </div>
+          Explore Visualizers
+        </motion.button>
+      </Link>
+    </div>
+  </section>
+);
 
-          <motion.h2
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-            }}
-            className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-4 tracking-tighter"
-          >
-            <motion.div
-              className="inline-block"
-              initial="hidden"
-              animate="visible"
-              variants={{
-                visible: { transition: { staggerChildren: 0.05 } },
-              }}
-            >
-              {animatedText.map((letter, i) => (
-                <motion.span
-                  key={i}
-                  className="inline-block"
-                  variants={textVariants}
-                  custom={i}
-                >
-                  <motion.span
-                    className="inline-block"
-                    animate={{
-                      y: [0, -8, 0],
-                      transition: {
-                        duration: 2,
-                        repeat: Infinity,
-                        repeatType: "loop",
-                        ease: "easeInOut",
-                        delay: i * 0.1,
-                      },
-                    }}
-                  >
-                    {letter}
-                  </motion.span>
-                </motion.span>
-              ))}
-            </motion.div>{" "}
-            Algorithms.
-            <br />
-            <span className="bg-gradient-to-r from-blue-500 to-teal-400 text-transparent bg-clip-text">
-              Master Data Structures.
-            </span>
-          </motion.h2>
-          <motion.p
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-            }}
-            className="max-w-2xl mx-auto text-base sm:text-lg text-gray-600 mb-8"
-          >
-            An interactive, modern, and blazing-fast platform to see algorithms
-            in action. Understand complex concepts with intuitive
-            visualizations.
-          </motion.p>
-          <motion.button
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg shadow-xl cursor-pointer"
-            whileHover={{
-              scale: 1.05,
-              boxShadow: "0px 8px 25px rgba(59, 130, 246, 0.4)",
-            }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              window.location.href = "/visualize";
-            }}
-          >
-            Get Started
-          </motion.button>
-        </motion.section>
+const Footer = () => (
+  <footer className="border-t border-slate-200 dark:border-white/10 mt-20">
+    <div className="container mx-auto px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+      <p>&copy; {new Date().getFullYear()} AlgoVisual. All rights reserved.</p>
+      <p className="mt-2">Designed and built with ❤️ by Dhiraj Kumar.</p>
+    </div>
+  </footer>
+);
 
-        {/* Features Section */}
-        <section id="features" className="py-16 sm:py-20 bg-gray-50">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-12">
-              <h3 className="text-3xl sm:text-4xl font-bold">
-                Why AlgoVisual?
-              </h3>
-              <p className="text-gray-600 mt-2">
-                Everything you need to conquer DSA.
-              </p>
-            </div>
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.3 }}
-              variants={{
-                visible: { transition: { staggerChildren: 0.2 } },
-              }}
-            >
-              <motion.div
-                className="bg-white p-8 rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 ring-1 ring-gray-900/5"
-                variants={{
-                  hidden: { opacity: 0, y: 30 },
-                  visible: { opacity: 1, y: 0 },
-                }}
-                whileHover={{
-                  y: -8,
-                  boxShadow: "0px 15px 30px rgba(0, 0, 0, 0.1)",
-                }}
-              >
-                <div className="bg-blue-100 text-blue-600 rounded-full p-3 w-max mb-4">
-                  <EyeIcon className="w-8 h-8" />
-                </div>
-                <h4 className="text-2xl font-bold mb-2">
-                  Interactive Visualization
-                </h4>
-                <p className="text-gray-600">
-                  Do not just read about algorithms. See them move,
-                  step-by-step. Control the speed and watch the magic unfold.
-                </p>
-              </motion.div>
-              <motion.div
-                className="bg-white p-8 rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 ring-1 ring-gray-900/5"
-                variants={{
-                  hidden: { opacity: 0, y: 30 },
-                  visible: { opacity: 1, y: 0 },
-                }}
-                whileHover={{
-                  y: -8,
-                  boxShadow: "0px 15px 30px rgba(0, 0, 0, 0.1)",
-                }}
-              >
-                <div className="bg-teal-100 text-teal-600 rounded-full p-3 w-max mb-4">
-                  <CodeIcon className="w-8 h-8" />
-                </div>
-                <h4 className="text-2xl font-bold mb-2">Side-by-Side Code</h4>
-                <p className="text-gray-600">
-                  Understand the implementation behind the visualization. See
-                  the exact lines of code being executed in real-time.
-                </p>
-              </motion.div>
-              <motion.div
-                className="bg-white p-8 rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 ring-1 ring-gray-900/5"
-                variants={{
-                  hidden: { opacity: 0, y: 30 },
-                  visible: { opacity: 1, y: 0 },
-                }}
-                whileHover={{
-                  y: -8,
-                  boxShadow: "0px 15px 30px rgba(0, 0, 0, 0.1)",
-                }}
-              >
-                <div className="bg-purple-100 text-purple-600 rounded-full p-3 w-max mb-4">
-                  <ZapIcon className="w-8 h-8" />
-                </div>
-                <h4 className="text-2xl font-bold mb-2">Blazing Fast</h4>
-                <p className="text-gray-600">
-                  Built with Next.js and TypeScript for a seamless, performant,
-                  and modern user experience. No lag, just learning.
-                </p>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
+// --- MAIN PAGE COMPONENT ---
 
-        {/* Supported DS & A Section */}
-        <section id="visualizer" className="py-16 sm:py-20">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-12">
-              <h3 className="text-3xl sm:text-4xl font-bold">
-                What You Can Visualize
-              </h3>
-              <p className="text-gray-600 mt-2">
-                A growing library of essential data structures and algorithms.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div>
-                <h4 className="text-2xl font-semibold mb-6 text-center">
-                  Data Structures
-                </h4>
-                <div className="flex flex-wrap justify-center gap-3">
-                  {dataStructures.map((ds, i) => (
-                    <motion.span
-                      key={ds}
-                      className="py-2 px-4 bg-gray-100 text-gray-700 rounded-full font-medium"
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: i * 0.05 }}
-                    >
-                      {ds}
-                    </motion.span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h4 className="text-2xl font-semibold mb-6 text-center">
-                  Algorithms
-                </h4>
-                <div className="flex flex-wrap justify-center gap-3">
-                  {algorithms.map((algo, i) => (
-                    <motion.span
-                      key={algo}
-                      className="py-2 px-4 bg-gray-100 text-gray-700 rounded-full font-medium"
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: i * 0.05 }}
-                    >
-                      {algo}
-                    </motion.span>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <p className="text-center mt-10 text-gray-500">
-              ...and many more coming soon!
-            </p>
-          </div>
-        </section>
+export default function LandingPage() {
+  const [theme, setTheme] = useState<string | null>(null);
 
-        {/* Call to Action */}
-        <section id="about" className="py-16 sm:py-20 bg-gray-50">
-          <div className="container mx-auto px-6 text-center">
-            <h3 className="text-3xl sm:text-4xl font-bold mb-4">
-              Ready to Start Learning?
-            </h3>
-            <p className="max-w-xl mx-auto text-lg text-gray-600 mb-8">
-              Stop struggling with complex topics. Start visualizing and build a
-              solid foundation in computer science today.
-            </p>
-            <motion.button
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg shadow-xl cursor-pointer"
-              whileHover={{
-                scale: 1.05,
-                boxShadow: "0px 8px 25px rgba(59, 130, 246, 0.4)",
-              }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                window.location.href = "/visualize";
-              }}
-            >
-              Explore Now
-            </motion.button>
-          </div>
-        </section>
+  useEffect(() => {
+    const savedTheme =
+      localStorage.getItem("theme") ||
+      (window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light");
+    setTheme(savedTheme);
+  }, []);
+
+  useEffect(() => {
+    if (theme) {
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      localStorage.setItem("theme", theme);
+    }
+  }, [theme]);
+
+  if (!theme) {
+    return null; // Render nothing until the theme is determined to prevent FOUC
+  }
+
+  return (
+    <div className="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-300 min-h-screen font-sans transition-colors duration-300 overflow-x-hidden">
+      <Background />
+      <Header theme={theme} setTheme={setTheme} />
+      <main className="pt-24">
+        <Hero />
+        <Features />
+        <Showcase />
+        <About />
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200">
-        <div className="container mx-auto px-6 py-8 text-center text-gray-500">
-          <p>
-            &copy; {new Date().getFullYear()} AlgoVisual. All rights reserved.
-          </p>
-          <p className="mt-2">
-            Designed and built with ❤️ for students and developers by Dhiraj
-            Kumar.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
