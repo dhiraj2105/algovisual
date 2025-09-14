@@ -47,7 +47,7 @@ const navigationItems = [
       { name: "Doubly Linked List" },
       { name: "Circular Linked List" },
       { name: "Binary Search Tree" },
-      { name: "Graph" },
+      { name: "Undirected Graph" },
     ],
   },
   {
