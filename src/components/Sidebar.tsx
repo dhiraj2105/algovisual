@@ -35,6 +35,14 @@ const DotIcon = ({ className }: { className?: string }) => (
 // --- Navigation Data ---
 const navigationItems = [
   {
+    category: "Basics",
+    items: [
+      { name: "For Loop" },
+      { name: "While Loop" },
+      { name: "Star Patterns" },
+    ],
+  },
+  {
     category: "Data Structures",
     items: [
       { name: "Array" },
@@ -59,6 +67,10 @@ const navigationItems = [
           { name: "Bubble Sort" },
           { name: "Quick Sort" },
           { name: "Merge Sort" },
+          { name: "Selection Sort" },
+          { name: "Insertion Sort" },
+          { name: "Heap Sort" },
+          { name: "Radix Sort" },
         ],
       },
       {
@@ -82,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
     {
       "Data Structures": true,
       Algorithms: true,
-    }
+    },
   );
   const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
 
@@ -178,7 +190,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
                                   {item.subItems.map((subItem) => {
                                     const linkPath = toPath(
                                       item.name,
-                                      subItem.name
+                                      subItem.name,
                                     );
                                     const isActive = pathname === linkPath;
 
