@@ -1,30 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 
-const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+// --- Types ---
+type QueueNode = number | null;
 
+// --- Helper Components ---
 const Button = ({
   children,
   onClick,
-  disabled = false,
   variant = "default",
+  disabled = false,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
-  disabled?: boolean;
   variant?: "default" | "destructive";
+  disabled?: boolean;
 }) => {
   const base =
-    "px-3 py-2 rounded-xl font-medium transition-colors duration-200 shadow text-sm sm:text-base disabled:opacity-60 disabled:cursor-not-allowed";
-  const styles =
-    variant === "destructive"
-      ? "bg-red-500 hover:bg-red-600 text-white"
-      : "bg-blue-500 hover:bg-blue-600 text-white";
+    "w-full px-4 py-2 rounded-lg font-semibold transition-all duration-300 shadow-md text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-offset-2 dark:ring-offset-gray-800";
+  const styles = {
+    default: "bg-blue-500 hover:bg-blue-600 text-white focus:ring-blue-400",
+    destructive: "bg-red-500 hover:bg-red-600 text-white focus:ring-red-400",
+  };
   return (
     <button
-      className={`${base} ${styles}`}
+      className={`${base} ${styles[variant]} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       onClick={onClick}
       disabled={disabled}
     >
@@ -33,278 +35,197 @@ const Button = ({
   );
 };
 
-type InputProps = {
-  value: string | number;
+const Input = ({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  type?: string;
-};
-
-const Input = ({ value, onChange, placeholder, type = "text" }: InputProps) => (
+  placeholder: string;
+}) => (
   <input
-    type={type}
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    className="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
+    className="w-full border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500 transition-all duration-300"
   />
 );
 
-export default function CircularQueueVisualizerPage() {
-  const [capacityInput, setCapacityInput] = useState<string>("5");
-  const [capacity, setCapacity] = useState<number | null>(null);
-  const [created, setCreated] = useState(false);
-
-  const [slots, setSlots] = useState<(number | null)[]>([]);
-  const [front, setFront] = useState(0);
+// --- Main Component ---
+export default function CircularQueueVisualizer() {
+  const [capacity, setCapacity] = useState(8);
+  const [queue, setQueue] = useState<QueueNode[]>(Array(capacity).fill(null));
+  const [front, setFront] = useState(-1);
   const [rear, setRear] = useState(-1);
-  const [size, setSize] = useState(0);
-
-  const [value, setValue] = useState<string>("");
+  const [inputValue, setInputValue] = useState("");
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null);
-  const [operation, setOperation] = useState<"enqueue" | "dequeue" | null>(
-    null
-  );
-  const [message, setMessage] = useState<string | null>(null);
+  const [operation, setOperation] = useState<string | null>(null);
 
-  const delayPerStep = 350;
-
-  const isEmpty = size === 0;
-  const isFull = capacity !== null ? size >= capacity : false;
-
-  const createQueue = () => {
-    const cap = Number(capacityInput);
-    if (!cap || cap <= 0) {
-      setMessage("Enter valid queue size > 0");
-      setTimeout(() => setMessage(null), 1500);
-      return;
-    }
-    setCapacity(cap);
-    setSlots(Array(cap).fill(null));
-    setFront(0);
-    setRear(-1);
-    setSize(0);
-    setCreated(true);
-  };
-
-  const destroyQueue = () => {
-    setCapacity(null);
-    setSlots([]);
-    setFront(0);
-    setRear(-1);
-    setSize(0);
-    setCreated(false);
-    setHighlightIndex(null);
-    setOperation(null);
-    setMessage(null);
-  };
-
-  const movePointer = async (
-    start: number,
-    target: number,
-    op: "enqueue" | "dequeue"
-  ) => {
-    setOperation(op);
-    let i = start;
-    while (i !== target) {
-      setHighlightIndex(i);
-      await sleep(delayPerStep);
-      i = (i + 1) % (capacity || 1);
-    }
-    setHighlightIndex(target);
-    await sleep(250);
-    setHighlightIndex(null);
-    setOperation(null);
-  };
+  const isFull = () =>
+    (front === 0 && rear === capacity - 1) || front === rear + 1;
+  const isEmpty = () => front === -1;
 
   const handleEnqueue = async () => {
-    if (!created) return setMessage("Create queue first");
-    if (isFull) {
-      setMessage("Queue is full");
-      setTimeout(() => setMessage(null), 1200);
+    if (isFull()) {
+      setOperation("Queue is Full");
+      await new Promise((res) => setTimeout(res, 1000));
+      setOperation(null);
       return;
     }
-    if (!value || isNaN(Number(value))) return;
+    if (!inputValue || isNaN(Number(inputValue))) return;
+    const value = Number(inputValue);
 
-    const num = Number(value);
-    const targetIndex = (rear + 1) % (capacity || 1);
-    const startIndex = size === 0 ? targetIndex : (rear + 1) % (capacity || 1);
+    let newRear = rear;
+    if (front === -1) {
+      setFront(0);
+      newRear = 0;
+    } else if (rear === capacity - 1) {
+      newRear = 0;
+    } else {
+      newRear = rear + 1;
+    }
 
-    await movePointer(startIndex, targetIndex, "enqueue");
+    setOperation(`Enqueue ${value} at index ${newRear}`);
+    setHighlightIndex(newRear);
+    await new Promise((res) => setTimeout(res, 500));
 
-    setSlots((s) => {
-      const ns = [...s];
-      ns[targetIndex] = num;
-      return ns;
-    });
-    setRear(targetIndex);
-    setSize((z) => z + 1);
-    setValue("");
+    const newQueue = [...queue];
+    newQueue[newRear] = value;
+    setQueue(newQueue);
+    setRear(newRear);
+    setInputValue("");
+    setHighlightIndex(null);
+    setOperation(null);
   };
 
   const handleDequeue = async () => {
-    if (!created) return setMessage("Create queue first");
-    if (isEmpty) {
-      setMessage("Queue is empty");
-      setTimeout(() => setMessage(null), 1200);
+    if (isEmpty()) {
+      setOperation("Queue is Empty");
+      await new Promise((res) => setTimeout(res, 1000));
+      setOperation(null);
       return;
     }
 
-    const targetIndex = front;
-    await movePointer(front, targetIndex, "dequeue");
+    setOperation(`Dequeue from index ${front}`);
+    setHighlightIndex(front);
+    await new Promise((res) => setTimeout(res, 500));
 
-    setSlots((s) => {
-      const ns = [...s];
-      ns[targetIndex] = null;
-      return ns;
-    });
-    setFront((f) => (f + 1) % (capacity || 1));
-    setSize((z) => z - 1);
+    const newQueue = [...queue];
+    newQueue[front] = null;
+    setQueue(newQueue);
 
-    if (size - 1 === 0) {
-      setFront(0);
+    if (front === rear) {
+      setFront(-1);
       setRear(-1);
+    } else if (front === capacity - 1) {
+      setFront(0);
+    } else {
+      setFront(front + 1);
     }
+    setHighlightIndex(null);
+    setOperation(null);
   };
 
+  const radius = 120;
+  const angleStep = (2 * Math.PI) / capacity;
+
   return (
-    <div className="flex flex-col h-screen w-full p-2 sm:p-4 gap-4">
-      <div className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-        {!created ? (
-          <div className="w-full max-w-md bg-white rounded-2xl shadow p-4 flex flex-col gap-3">
-            <div className="text-lg font-semibold">Create Circular Queue</div>
-            <div className="flex gap-2 items-center">
-              <Input
-                type="number"
-                value={capacityInput}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setCapacityInput(e.target.value)
-                }
-                placeholder="Queue size e.g. 5"
-              />
-              <Button onClick={createQueue}>Create</Button>
-            </div>
-            {message && <div className="text-sm text-red-500">{message}</div>}
-          </div>
-        ) : (
-          <div
-            className={`border-4 rounded-xl p-4 flex flex-col gap-4 items-center justify-center w-full max-w-3xl bg-gray-50 dark:bg-gray-800 ${
-              isFull
-                ? "border-red-500"
-                : isEmpty
-                ? "border-yellow-400"
-                : "border-gray-400"
-            }`}
-          >
-            <div className="text-lg font-semibold text-white">
-              Circular Queue (capacity: {capacity})
-            </div>
+    <div className="flex flex-col h-screen w-full bg-gray-50 dark:bg-gray-900 p-4 gap-4">
+      <header className="text-center">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white">
+          Circular Queue
+        </h1>
+      </header>
 
-            <div className="flex w-full justify-center gap-3 flex-wrap">
-              <AnimatePresence>
-                {slots.map((slot, index) => {
-                  const isFilled = slot !== null;
-                  const isHighlighted = highlightIndex === index;
-                  const showFront = index === front && size > 0;
-                  const showRear = index === rear && size > 0;
-                  return (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 6 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 220,
-                        damping: 20,
-                      }}
-                      className="relative flex flex-col items-center"
-                    >
-                      {isHighlighted && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className={`mb-1 text-2xl ${
-                            operation === "enqueue"
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
-                        >
-                          ⬇
-                        </motion.div>
-                      )}
-                      <motion.div
-                        animate={{
-                          backgroundColor: isHighlighted
-                            ? operation === "enqueue"
-                              ? "#4ade80"
-                              : "#f87171"
-                            : isFilled
-                            ? "#3b82f6"
-                            : "#e5e7eb",
-                        }}
-                        transition={{ duration: 0.3 }}
-                        className="w-16 sm:w-20 h-12 sm:h-14 rounded-lg flex items-center justify-center text-white font-semibold shadow"
-                      >
-                        {slot}
-                      </motion.div>
-                      <div className="flex gap-1 mt-1 text-white">
-                        {showFront && (
-                          <span className="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-800">
-                            F
-                          </span>
-                        )}
-                        {showRear && (
-                          <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-800">
-                            R
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs mt-1 text-white">{index}</span>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-
-            <div className="flex gap-2 text-white text-xs">
-              <span>Front: {size === 0 ? "-" : front}</span>
-              <span>Rear: {rear === -1 ? "-" : rear}</span>
-              <span>
-                Size: {size}/{capacity}
-              </span>
-            </div>
+      <div className="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-lg flex items-center justify-center p-4 relative">
+        <div
+          style={{
+            width: `${radius * 2 + 80}px`,
+            height: `${radius * 2 + 80}px`,
+          }}
+          className="relative"
+        >
+          {queue.map((value, index) => {
+            const angle = index * angleStep - Math.PI / 2;
+            const x = radius + radius * Math.cos(angle);
+            const y = radius + radius * Math.sin(angle);
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  x,
+                  y,
+                  backgroundColor:
+                    highlightIndex === index
+                      ? "#facc15"
+                      : value !== null
+                        ? "#3b82f6"
+                        : "#9ca3af",
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="absolute w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md"
+              >
+                {value}
+                <div className="absolute -bottom-6 text-xs text-gray-500 dark:text-gray-400">
+                  {index}
+                </div>
+                {front === index && (
+                  <div className="absolute top-0 -translate-y-full bg-yellow-400 text-black text-xs px-2 py-1 rounded">
+                    Front
+                  </div>
+                )}
+                {rear === index && (
+                  <div className="absolute bottom-0 translate-y-full bg-green-400 text-black text-xs px-2 py-1 rounded">
+                    Rear
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+        {operation && (
+          <div className="absolute top-4 left-4 bg-gray-200 dark:bg-gray-700 p-2 rounded-lg text-sm">
+            {operation}
           </div>
         )}
       </div>
 
-      <div className="h-[20%] bg-white rounded-2xl shadow p-3 flex flex-col gap-3">
-        <div className="flex gap-2 items-center flex-wrap">
-          <Input
-            type="number"
-            placeholder="Value to enqueue"
-            value={value}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setValue(e.target.value)
-            }
-          />
-          <Button onClick={handleEnqueue} disabled={!created || isFull}>
-            Enqueue
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={handleDequeue}
-            disabled={!created || isEmpty}
-          >
-            Dequeue
-          </Button>
-          <Button variant="destructive" onClick={destroyQueue}>
-            Destroy
-          </Button>
+      <footer className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex flex-col gap-3">
+            <h3 className="font-semibold text-gray-700 dark:text-gray-200">
+              Value
+            </h3>
+            <Input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Enter value"
+            />
+          </div>
+          <div className="flex flex-col gap-3">
+            <h3 className="font-semibold text-gray-700 dark:text-gray-200">
+              Capacity
+            </h3>
+            <Input
+              value={String(capacity)}
+              onChange={(e) => setCapacity(Number(e.target.value))}
+              placeholder="Enter capacity"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Button onClick={handleEnqueue} disabled={!inputValue}>
+              Enqueue
+            </Button>
+            <Button variant="destructive" onClick={handleDequeue}>
+              Dequeue
+            </Button>
+          </div>
         </div>
-        {message && <div className="text-sm text-red-500">{message}</div>}
-      </div>
+      </footer>
     </div>
   );
 }
