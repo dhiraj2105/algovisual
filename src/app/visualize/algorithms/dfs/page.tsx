@@ -147,16 +147,16 @@ export default function InteractiveDFSVisualizer() {
           return (
             <motion.div
               key={node.id}
-              className="absolute flex items-center justify-center w-12 h-12 rounded-full border shadow-md text-lg font-bold cursor-pointer select-none"
+              className="absolute flex items-center justify-center w-12 h-12 rounded-full border shadow-md text-lg text-black font-bold cursor-pointer select-none"
               style={{ left: node.x, top: node.y }}
               animate={{
                 backgroundColor: isCurrent
                   ? "#f472b6"
                   : isVisited
-                  ? "#4ade80"
-                  : isEdgeSelected
-                  ? "#60a5fa"
-                  : "#ffffff",
+                    ? "#4ade80"
+                    : isEdgeSelected
+                      ? "#60a5fa"
+                      : "#ffffff",
                 scale: isCurrent ? 1.2 : 1,
               }}
               onClick={() =>

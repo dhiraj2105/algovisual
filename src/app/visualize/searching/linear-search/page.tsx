@@ -31,7 +31,7 @@ export default function LinearSearchVisualizer() {
     const length = Math.floor(Math.random() * 6) + 6; // 6-12 elements
     const arr = Array.from(
       { length },
-      () => Math.floor(Math.random() * 90) + 10
+      () => Math.floor(Math.random() * 90) + 10,
     );
     setArray(arr);
     resetState();
@@ -107,14 +107,16 @@ export default function LinearSearchVisualizer() {
                         ? "#f87171" // red if not found
                         : "#4ade80" // green if found
                       : isCurrent
-                      ? "#fde047"
-                      : "#ffffff",
+                        ? "#fde047"
+                        : "#ffffff",
                   }}
                   transition={{ duration: 0.3 }}
                   className="relative flex flex-col items-center justify-center w-20 h-20 border rounded shadow-md cursor-pointer select-none"
                   onClick={() => deleteElement(index)}
                 >
-                  <div className="text-lg font-semibold">{value}</div>
+                  <div className="text-lg text-black font-semibold">
+                    {value}
+                  </div>
                   <div className="text-xs text-gray-500">[{index}]</div>
 
                   {/* Pointer arrow */}

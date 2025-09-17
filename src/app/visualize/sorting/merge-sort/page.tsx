@@ -49,7 +49,7 @@ export default function MergeSortVisualizer() {
   const mergeSort = async (
     arr: number[],
     l: number,
-    r: number
+    r: number,
   ): Promise<void> => {
     if (l >= r) return;
     const mid = Math.floor((l + r) / 2);
@@ -235,7 +235,7 @@ export default function MergeSortVisualizer() {
               className="flex flex-col items-center justify-center w-20 h-20 border rounded shadow-md cursor-pointer select-none"
               onClick={() => deleteElement(index)}
             >
-              <div className="text-lg font-semibold">{value}</div>
+              <div className="text-lg text-black font-semibold">{value}</div>
               <div className="text-xs text-gray-500">[{index}]</div>
             </motion.div>
           ))}

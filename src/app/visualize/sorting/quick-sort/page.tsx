@@ -42,7 +42,7 @@ export default function QuickSortVisualizer() {
   const quickSort = async (
     arr: number[],
     low: number,
-    high: number
+    high: number,
   ): Promise<void> => {
     if (low < high) {
       const pIndex = await partition(arr, low, high);
@@ -54,7 +54,7 @@ export default function QuickSortVisualizer() {
   const partition = async (
     arr: number[],
     low: number,
-    high: number
+    high: number,
   ): Promise<number> => {
     const pivot = arr[high];
     setPivotIndex(high);
@@ -137,8 +137,8 @@ export default function QuickSortVisualizer() {
                       backgroundColor: isPivot
                         ? "#f472b6"
                         : isComparing
-                        ? "#fde047"
-                        : "#ffffff",
+                          ? "#fde047"
+                          : "#ffffff",
                       boxShadow: isSwapping
                         ? "0 8px 24px rgba(0,0,0,0.25)"
                         : "0 4px 8px rgba(0,0,0,0.08)",
@@ -147,7 +147,9 @@ export default function QuickSortVisualizer() {
                     className="flex flex-col items-center justify-center w-20 h-20 border rounded shadow-md cursor-pointer select-none"
                     onClick={() => deleteElement(index)}
                   >
-                    <div className="text-lg font-semibold">{value}</div>
+                    <div className="text-lg text-black font-semibold">
+                      {value}
+                    </div>
                     <div className="text-xs text-gray-500">[{index}]</div>
                     {isPivot && (
                       <div className="text-xs text-pink-600">Pivot</div>

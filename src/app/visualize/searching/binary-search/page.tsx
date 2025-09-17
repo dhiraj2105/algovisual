@@ -285,7 +285,7 @@ export default function BinarySearchVisualizer() {
     const length = Math.floor(Math.random() * 6) + 6; // 6-12 elements
     const arr = Array.from(
       { length },
-      () => Math.floor(Math.random() * 90) + 10
+      () => Math.floor(Math.random() * 90) + 10,
     ).sort((a, b) => a - b);
     setArray(arr);
     setTarget("");
@@ -407,17 +407,19 @@ export default function BinarySearchVisualizer() {
                     backgroundColor: isResult
                       ? "#4ade80"
                       : isMid
-                      ? "#f472b6"
-                      : isLow
-                      ? "#60a5fa"
-                      : isHigh
-                      ? "#facc15"
-                      : "#ffffff",
+                        ? "#f472b6"
+                        : isLow
+                          ? "#60a5fa"
+                          : isHigh
+                            ? "#facc15"
+                            : "#ffffff",
                   }}
                   transition={{ duration: 0.3 }}
                   className="relative flex flex-col items-center justify-center w-20 h-20 border rounded shadow-md select-none"
                 >
-                  <div className="text-lg font-semibold">{value}</div>
+                  <div className="text-lg text-black font-semibold">
+                    {value}
+                  </div>
                   <div className="text-xs text-gray-500">[{index}]</div>
 
                   {/* Pointer arrows */}
